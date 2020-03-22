@@ -19,7 +19,7 @@ CREATE TABLE person(
 	PRIMARY KEY (person_id)
 );
 INSERT INTO person VALUES (1, 'Bailey Kyle', 'Thompson Rocheleau', 1, 'bkthomps@edu.uwaterloo.ca', 'badpass'),
-						  (2, 'Peiyao Rachel', 'Chen', 2, 'p72chen@edu.uwaterloo.ca', 'password');
+                          (2, 'Peiyao Rachel', 'Chen', 2, 'p72chen@edu.uwaterloo.ca', 'password');
 
 CREATE TABLE sex(
 	sex_id   INT         NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE sex(
 	PRIMARY KEY (sex_id)
 );
 INSERT INTO person VALUES (1, 'Male'),
-						  (2, 'Female'),
+                          (2, 'Female'),
                           (3, 'Other');
 
 CREATE TABLE groups(
@@ -37,7 +37,7 @@ CREATE TABLE groups(
 	PRIMARY KEY (group_id)
 );
 INSERT INTO groups VALUES (1, 'Waterloo Housing', 'Student housing in the Waterloo/Kitchener region'),
-						  (2, 'Landlord Tenant Board', 'The Ontario Landlord Tenant Dispute board');
+                          (2, 'Landlord Tenant Board', 'The Ontario Landlord Tenant Dispute board');
 
 CREATE TABLE following_friends(
 	first_person_id  INT NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE following_friends(
 	PRIMARY KEY (first_person_id, second_person_id)
 );
 INSERT INTO following_friends VALUES (1, 2),
-									 (2, 1);
+                                     (2, 1);
 
 CREATE TABLE following_groups(
 	person_id INT NOT NULL,
