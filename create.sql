@@ -53,7 +53,7 @@ CREATE TABLE following_groups(
 	PRIMARY KEY (person_id, group_id)
 );
 INSERT INTO following_groups VALUES (1, 2),
-									(2, 1);
+                                    (2, 1);
 
 CREATE TABLE topic(
 	topic_id        INT          NOT NULL,
