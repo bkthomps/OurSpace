@@ -26,9 +26,9 @@ CREATE TABLE sex(
 	sex_name VARCHAR(10) NOT NULL,
 	PRIMARY KEY (sex_id)
 );
-INSERT INTO person VALUES (1, 'Male'),
-                          (2, 'Female'),
-                          (3, 'Other');
+INSERT INTO sex VALUES (1, 'Male'),
+                       (2, 'Female'),
+                       (3, 'Other');
 
 CREATE TABLE groups(
 	group_id    INT          NOT NULL,
