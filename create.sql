@@ -1,16 +1,18 @@
-use our_space;
+USE our_space;
 
 DROP TABLE IF EXISTS person;
 DROP TABLE IF EXISTS sex;
 DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS following_friends;
 DROP TABLE IF EXISTS following_groups;
-DROP TABLE IF EXISTS topic;
 DROP TABLE IF EXISTS post;
-DROP TABLE IF EXISTS post_read;
+DROP TABLE IF EXISTS post_comment;
+DROP TABLE IF EXISTS comment_reply;
+DROP TABLE IF EXISTS react_type;
+DROP TABLE IF EXISTS content_react;
 
 CREATE TABLE person(
-	person_id  INT         NOT NULL,
+	person_id  BIGINT      NOT NULL,
 	first_name VARCHAR(50) NOT NULL,
 	last_name  VARCHAR(50) NOT NULL,
 	sex_id     INT         NOT NULL,
@@ -18,67 +20,72 @@ CREATE TABLE person(
 	passcode   VARCHAR(50) NOT NULL,
 	PRIMARY KEY (person_id)
 );
-INSERT INTO person VALUES (1, 'Bailey Kyle', 'Thompson Rocheleau', 1, 'bkthomps@edu.uwaterloo.ca', 'badpass'),
-                          (2, 'Peiyao Rachel', 'Chen', 2, 'p72chen@edu.uwaterloo.ca', 'password');
 
 CREATE TABLE sex(
 	sex_id   INT         NOT NULL,
 	sex_name VARCHAR(10) NOT NULL,
 	PRIMARY KEY (sex_id)
 );
-INSERT INTO sex VALUES (1, 'Male'),
-                       (2, 'Female'),
-                       (3, 'Other');
 
 CREATE TABLE groups(
-	group_id    INT          NOT NULL,
-	group_name  VARCHAR(50)  NOT NULL,
-	description VARCHAR(500) NOT NULL,
+	group_id    BIGINT      NOT NULL,
+	group_name  VARCHAR(50) NOT NULL,
 	PRIMARY KEY (group_id)
 );
-INSERT INTO groups VALUES (1, 'Waterloo Housing', 'Student housing in the Waterloo/Kitchener region'),
-                          (2, 'Landlord Tenant Board', 'The Ontario Landlord Tenant Dispute board');
 
 CREATE TABLE following_friends(
-	first_person_id  INT NOT NULL,
-	second_person_id INT NOT NULL,
+	first_person_id  BIGINT NOT NULL,
+	second_person_id BIGINT NOT NULL,
 	PRIMARY KEY (first_person_id, second_person_id)
 );
-INSERT INTO following_friends VALUES (1, 2),
-                                     (2, 1);
 
 CREATE TABLE following_groups(
-	person_id INT NOT NULL,
-	group_id  INT NOT NULL,
+	person_id BIGINT NOT NULL,
+	group_id  BIGINT NOT NULL,
 	PRIMARY KEY (person_id, group_id)
 );
-INSERT INTO following_groups VALUES (1, 2),
-                                    (2, 1);
-
-CREATE TABLE topic(
-	topic_id        INT          NOT NULL,
-	description     VARCHAR(100) NOT NULL,
-	parent_topic_id INT,
-	PRIMARY KEY (topic_id)
-);
-INSERT INTO topic VALUES (1, 'News', NULL);
 
 CREATE TABLE post(
-	post_id          INT          NOT NULL,
-	content          VARCHAR(500) NOT NULL,
-	poster_person_id INT          NOT NULL,
-	thumb_up_count   INT          NOT NULL,
-	thumb_down_count INT          NOT NULL,
-	parent_post_id   INT,
+	post_id    BIGINT         NOT NULL,
+	content    VARCHAR(15000) NOT NULL,
+	person_id  BIGINT         NOT NULL,
+	group_id   BIGINT         NOT NULL,
+	time_stamp VARCHAR(20)    NOT NULL,
+	likes      INT            NOT NULL,
+	shares     INT            NOT NULL,
 	PRIMARY KEY (post_id)
 );
-INSERT INTO post VALUES (1, 'First Post', 1, 0, 0, NULL);
 
-CREATE TABLE post_read(
-	post_id     INT     NOT NULL,
-	person_id   INT     NOT NULL,
-	thumbs_up   BOOLEAN NOT NULL,
-	thumbs_down BOOLEAN NOT NULL,
-	PRIMARY KEY (post_id, person_id)
+CREATE TABLE post_comment(
+	comment_id BIGINT         NOT NULL,
+	content    VARCHAR(15000) NOT NULL,
+	person_id  BIGINT         NOT NULL,
+	group_id   BIGINT         NOT NULL,
+	time_stamp VARCHAR(20)    NOT NULL,
+	post_id    BIGINT         NOT NULL,
+	PRIMARY KEY (comment_id)
 );
-INSERT INTO post_read VALUES (1, 1, FALSE, TRUE);
+
+CREATE TABLE comment_reply(
+	reply_id   BIGINT         NOT NULL,
+	content    VARCHAR(15000) NOT NULL,
+	person_id  BIGINT         NOT NULL,
+	group_id   BIGINT         NOT NULL,
+	time_stamp VARCHAR(20)    NOT NULL,
+	post_id    BIGINT         NOT NULL,
+	comment_id BIGINT         NOT NULL,
+	PRIMARY KEY (reply_id)
+);
+
+CREATE TABLE react_type(
+	react_id   INT         NOT NULL,
+	react_name VARCHAR(10) NOT NULL,
+	PRIMARY KEY (react_id)
+);
+
+CREATE TABLE content_react(
+	content_id         BIGINT NOT NULL,
+	reacting_person_id BIGINT NOT NULL,
+	reaction_type      INT    NOT NULL,
+	PRIMARY KEY (content_id, reacting_person_id)
+);
