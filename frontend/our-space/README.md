@@ -1,8 +1,7 @@
-1. Make sure you have Node.js installed
-2. Make sure have npm installed
-3. Go into frontend/our-space
-4. Install dependencies
+1. Make sure you have Node.js and npm installed
+   - Mac: $ brew install node
+2. Go into frontend/our-space
+3. Install dependencies
    $ npm install
-5. Run
-   npm start
-
+4. Run
+   $ npm start
