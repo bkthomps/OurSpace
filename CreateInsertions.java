@@ -16,7 +16,7 @@ public class CreateInsertions {
     private static final Path LIKE = Paths.get("like.csv");
     private static final String INSERT = "insert.sql";
 
-    private static final Set<String> peopleID = new HashSet<>();
+    private static final Map<String, String> peopleID = new HashMap<>();
     private static final Set<String> posts = new HashSet<>();
     private static final Set<String> postComments = new HashSet<>();
     private static int replyID;
@@ -32,6 +32,7 @@ public class CreateInsertions {
         addSex(list);
         addPeople(list);
         addGroups(list);
+        addGroupAdmin(list);
         addFollowingFriends(list);
         addFollowingGroups(list);
         addPost(list);
@@ -62,6 +63,7 @@ public class CreateInsertions {
         var emails = new HashMap<String, Integer>();
         while ((line = reader.readLine()) != null) {
             var attributes = line.split(",");
+            var groupID = attributes[0];
             var personID = attributes[1];
             var personName = attributes[2];
             if (!people.contains(personID)) {
@@ -83,7 +85,7 @@ public class CreateInsertions {
                     emails.put(emailBase, value + 1);
                 }
                 var passcode = generatePassword();
-                peopleID.add(personID);
+                peopleID.put(personID, groupID);
                 String insert;
                 if (!isSubsequent) {
                     insert = String.format("INSERT INTO person VALUES (%s, '%s', '%s', %s, '%s', '%s'),",
@@ -141,6 +143,47 @@ public class CreateInsertions {
                 isSubsequent = true;
             } else {
                 insert = String.format("    (%s, '%s'),", groupID, groupName);
+            }
+            list.add(insert);
+        }
+        var last = list.remove(list.size() - 1);
+        last = last.substring(0, last.length() - 1) + ';';
+        list.add(last);
+        list.add("");
+    }
+
+    private static void addGroupAdmin(List<String> list) {
+        boolean isSubsequent = false;
+        int groupCount = 5;
+        int addingAverage = (int) (groupCount * 10 * Math.random());
+        var entrySet = peopleID.entrySet();
+        var keys = new String[entrySet.size()];
+        var values = new String[keys.length];
+        int i = 0;
+        for (var entry : entrySet) {
+            keys[i] = entry.getKey();
+            values[i] = entry.getValue();
+            i++;
+        }
+        int count = 0;
+        var entries = new HashSet<String>();
+        var set = new HashSet<String>();
+        while (set.size() != groupCount && count < addingAverage) {
+            int index = (int) (keys.length * Math.random());
+            var personID = keys[index];
+            var groupID = values[index];
+            if (set.contains(personID + '_' + groupID)) {
+                continue;
+            }
+            set.add(groupID);
+            entries.add(personID + '_' + groupID);
+            count++;
+            String insert;
+            if (!isSubsequent) {
+                insert = String.format("INSERT INTO group_admin VALUES (%s, '%s'),", groupID, personID);
+                isSubsequent = true;
+            } else {
+                insert = String.format("    (%s, '%s'),", groupID, personID);
             }
             list.add(insert);
         }
@@ -226,7 +269,7 @@ public class CreateInsertions {
             var shares = attributes[5];
             var content = attributes[7].replace("{COMMA}", ",").replace("{APOST}", "\\'").replace("{RET}", " ");
             int likes = (int) Double.parseDouble(attributes[8].isEmpty() ? "0.0" : attributes[8]);
-            if (!posts.contains(postID) && peopleID.contains(personID)) {
+            if (!posts.contains(postID) && peopleID.containsKey(personID)) {
                 posts.add(postID);
                 String insert;
                 if (!isSubsequent) {
@@ -261,7 +304,7 @@ public class CreateInsertions {
             var replyPersonID = attributes[6];
             var content = attributes[7].replace("{COMMA}", ",").replace("{APOST}", "\\'").replace("{RET}", " ");
             if (replyPersonID.isEmpty() && !postComments.contains(commentID)
-                    && posts.contains(postID) && peopleID.contains(personID)) {
+                    && posts.contains(postID) && peopleID.containsKey(personID)) {
                 if (posts.contains(commentID)) {
                     throw new IllegalStateException("Comment ID intersects with post ID");
                 }
@@ -272,7 +315,7 @@ public class CreateInsertions {
                     insert = String.format("INSERT INTO post_comment VALUES (%s, '%s', %s, %s, '%s', %s),",
                             commentID, content, personID, groupID, timeStamp, postID);
                     isSubsequent = true;
-                } else if (count % 10000 == 0) {
+                } else if (count % 20_000 == 0) {
                     var last = list.remove(list.size() - 1);
                     last = last.substring(0, last.length() - 1) + ';';
                     list.add(last);
@@ -304,7 +347,7 @@ public class CreateInsertions {
             var personID = attributes[6];
             var content = attributes[7].replace("{COMMA}", ",").replace("{APOST}", "\\'").replace("{RET}", " ");
             if (!personID.isEmpty() && posts.contains(postID)
-                    && postComments.contains(commentID) && peopleID.contains(personID)) {
+                    && postComments.contains(commentID) && peopleID.containsKey(personID)) {
                 replyID++;
                 if (posts.contains("" + replyID)) {
                     throw new IllegalStateException("Reply ID intersects with post ID");
@@ -355,7 +398,7 @@ public class CreateInsertions {
             // Only posts and comments have reactions; not comments to comments
             var contentID = commentID.equals("x") ? postID : commentID;
             if (reactedCombination.contains(reactingPersonID + '_' + contentID)
-                    || !peopleID.contains(reactingPersonID) || !posts.contains(postID)) {
+                    || !peopleID.containsKey(reactingPersonID) || !posts.contains(postID)) {
                 continue;
             }
             reactedCombination.add(reactingPersonID + '_' + contentID);

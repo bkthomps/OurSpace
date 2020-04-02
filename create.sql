@@ -3,6 +3,7 @@ USE our_space;
 DROP TABLE IF EXISTS person;
 DROP TABLE IF EXISTS sex;
 DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS group_admin;
 DROP TABLE IF EXISTS following_friends;
 DROP TABLE IF EXISTS following_groups;
 DROP TABLE IF EXISTS post;
@@ -31,6 +32,12 @@ CREATE TABLE groups(
 	group_id    BIGINT      NOT NULL,
 	group_name  VARCHAR(50) NOT NULL,
 	PRIMARY KEY (group_id)
+);
+
+CREATE TABLE group_admin(
+	group_id  BIGINT NOT NULL,
+	person_id BIGINT NOT NULL,
+	PRIMARY KEY (group_id, person_id)
 );
 
 CREATE TABLE following_friends(
