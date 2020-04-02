@@ -37,10 +37,10 @@ BEGIN
 END$$
 DELIMITER ;
 
-CALL CreateAccount('Cave', 'Johnson', 1, 'cave.johnson@aperture.org', 'glados84', @person_id, @error_code);
-SELECT @person_id;
-SELECT @error_code;
-SELECT * FROM person WHERE person_id = 10216646959432839;
+-- CALL CreateAccount('Cave', 'Johnson', 1, 'cave.johnson@aperture.org', 'glados84', @person_id, @error_code);
+-- SELECT @person_id;
+-- SELECT @error_code;
+-- SELECT * FROM person WHERE person_id = 10216646959432839;
 
 DROP PROCEDURE IF EXISTS DeleteAccount;
 DELIMITER $$
@@ -111,7 +111,7 @@ BEGIN
 END$$
 DELIMITER ;
 
-CALL ModifyAccount(10216646959432839, 'Cave', 'Johnson', 1, 'cave.johnson@aperture.org', 'glados92', @error_code);
-SELECT @person_id;
-SELECT @error_code;
-SELECT * FROM person WHERE person_id = 10216646959432839;
+-- CALL ModifyAccount(10216646959432839, 'Cave', 'Johnson', 1, 'cave.johnson@aperture.org', 'glados92', @error_code);
+-- SELECT @person_id;
+-- SELECT @error_code;
+-- SELECT * FROM person WHERE person_id = 10216646959432839;
