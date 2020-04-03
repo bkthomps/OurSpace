@@ -139,7 +139,7 @@ public class CreateInsertions {
             var groupName = attributes[1];
             String insert;
             if (!isSubsequent) {
-                insert = String.format("INSERT INTO groups VALUES (%s, '%s'),", groupID, groupName);
+                insert = String.format("INSERT INTO `groups` VALUES (%s, '%s'),", groupID, groupName);
                 isSubsequent = true;
             } else {
                 insert = String.format("    (%s, '%s'),", groupID, groupName);
