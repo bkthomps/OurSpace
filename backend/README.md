@@ -15,3 +15,6 @@
    $ pip install flask-mysql
 8. Run
    flask run
+
+note: if you run into errors you probably didn't activate ur venv so 
+$ source venv/bin/activate
