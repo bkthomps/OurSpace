@@ -1,32 +1,25 @@
-import os
-
+import mysql.connector
 from flask import Flask
-from flaskext.mysql import MySQL
+from os import environ
+from .utils.queries import groups_query
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
-    mysql = MySQL()
-    
-    app.config.from_mapping(
-        SECRET_KEY='dev')
-
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
-
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
+    app = Flask(__name__)
 
     # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    @app.route('/groups')
+    def get_groups():
+        cnx = mysql.connector.connect(user=environ.get('DB_USER'), password=environ.get('DB_PASSWORD'), host=environ.get('DB_HOST'), database=environ.get('DB_NAME'), auth_plugin='mysql_native_password')
+        cursor = cnx.cursor()
+        cursor.execute(groups_query)
+        output = {}
+        for (group_id, group_name) in cursor:
+            output[group_id] = group_name
+        cursor.close()
+        cnx.close()
+        return {
+            "groups": output
+        }
 
     return app

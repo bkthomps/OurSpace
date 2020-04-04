@@ -1,3 +1,4 @@
+PROJECT SETUP GUIDE
 1. Make sure you have python3 at least 3.6 installed
 2. Make sure you have pip installed
 3. Create your environment
@@ -11,10 +12,16 @@
 6. Install python-dotenv
    $ pipenv install flask python-dotenv
    $ pipenv shell
-7. Install flask-mysql
-   $ pip install flask-mysql
-8. Run
-   flask run
+7. To use MySQLdb we need to download the offical connector
+   https://dev.mysql.com/doc/connector-python/en/connector-python-installation.html
+   After you've downloaded the connector you need to install the python3 connector
+   $ pip3 install mysql-connector-python
+8. Copy the .config_env file into a .env file and set your db settings
+9. Run
+   $ flask run
 
-note: if you run into errors you probably didn't activate ur venv so 
+RUNNING THE PROJECT GUIDE
+1. Make sure you activate the virtual environment 
 $ source venv/bin/activate
+2. Run the project
+   $ flask run
