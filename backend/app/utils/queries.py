@@ -10,3 +10,12 @@ show_followed_groups = 'select distinct group_id, group_name from our_space.foll
 show_user = 'select * from our_space.person where person_id = $id;'
 
 show_reaction = 'select * from our_space.content_react where reacting_person_id = $pid and content_id = $cid;' 
+
+# show_posts 
+# show_post
+
+# show_comments
+# show_comment
+
+# show_comment_replies
+# show_comment_reply
