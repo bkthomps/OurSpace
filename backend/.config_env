@@ -1,0 +1,4 @@
+DB_USER = username
+DB_PASSWORD = password
+DB_HOST = 100.100.0.22
+DB_NAME = our_space 
