@@ -90,16 +90,43 @@ def create_app(test_config=None):
             
         disconnect(cnx, cursor)
         return output
-    # @app.route('/<uid>/posts', methods = ['GET', 'POST'])
-    # def posts(uid):
-    #     if request.method == 'POST':
+    @app.route('/<uid>/posts', methods = ['GET', 'POST'])
+    def posts(uid):
+        cnx, cursor = connect()
+        output = {}
+        if request.method == 'POST':
+            
+            disconnect(cnx, cursor)
+            return output
         
+        disconnect(cnx, cursor)
+        return output
+            
 
     # @app.route('/<uid>/<pid>/comments', methods = ['GET', 'POST'])
     # def comments(uid, pid):
+    #     cnx, cursor = connect()
+    #     output = {}
+    #     if request.method == 'POST':
+            
+    #         disconnect(cnx, cursor)
+    #         return output
+        
+    #     disconnect(cnx, cursor)
+    #     return output
 
     # @app.route('/<uid>/<cid>/commentreplies', methods = ['GET', 'POST'])
     # def reply_comment(uid, cid):
+    #     cnx, cursor = connect()
+    #     output = {}
+    #     if request.method == 'POST':
+            
+    #         disconnect(cnx, cursor)
+    #         return output
+        
+    #     disconnect(cnx, cursor)
+    #     return output
+
 
 
     @app.route('/<uid>/users/follow', methods = ['GET', 'POST'])
