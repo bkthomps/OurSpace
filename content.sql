@@ -143,18 +143,18 @@ BEGIN
 END$$
 DELIMITER ;
 
-CALL CreateCommentReply(1, 1, "Hello", 1, 1, @reply_id, @error_code);
-SELECT @reply_id;
-SELECT @error_code;
-CALL CreateCommentReply(10216646959432838, 1, "Hello", 1, 1, @reply_id, @error_code);
-SELECT @reply_id;
-SELECT @error_code;
-CALL CreateCommentReply(10216646959432838, NULL, "Hello", 1, 1, @reply_id, @error_code);
-SELECT @reply_id;
-SELECT @error_code;
-CALL CreateCommentReply(10216646959432838, NULL, "Hello", 10155755392661078, 1, @reply_id, @error_code);
-SELECT @reply_id;
-SELECT @error_code;
-CALL CreateCommentReply(10216646959432838, NULL, "Hello", 10155755392661078, 10155755392661079, @reply_id, @error_code);
-SELECT @reply_id;
-SELECT @error_code;
+-- CALL CreateCommentReply(1, 1, "Hello", 1, 1, @reply_id, @error_code);
+-- SELECT @reply_id;
+-- SELECT @error_code;
+-- CALL CreateCommentReply(10216646959432838, 1, "Hello", 1, 1, @reply_id, @error_code);
+-- SELECT @reply_id;
+-- SELECT @error_code;
+-- CALL CreateCommentReply(10216646959432838, NULL, "Hello", 1, 1, @reply_id, @error_code);
+-- SELECT @reply_id;
+-- SELECT @error_code;
+-- CALL CreateCommentReply(10216646959432838, NULL, "Hello", 10155755392661078, 1, @reply_id, @error_code);
+-- SELECT @reply_id;
+-- SELECT @error_code;
+-- CALL CreateCommentReply(10216646959432838, NULL, "Hello", 10155755392661078, 10155755392661079, @reply_id, @error_code);
+-- SELECT @reply_id;
+-- SELECT @error_code;
