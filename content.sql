@@ -158,3 +158,54 @@ DELIMITER ;
 -- CALL CreateCommentReply(10216646959432838, NULL, "Hello", 10155755392661078, 10155755392661079, @reply_id, @error_code);
 -- SELECT @reply_id;
 -- SELECT @error_code;
+
+DROP PROCEDURE IF EXISTS DeleteCommentReply;
+DELIMITER $$
+CREATE PROCEDURE DeleteCommentReply(
+    IN reply_id BIGINT
+)
+BEGIN
+	DELETE FROM content_react WHERE content_id = reply_id;
+    DELETE FROM comment_reply WHERE comment_reply.reply_id = reply_id;
+END$$
+DELIMITER ;
+
+-- CALL DeleteCommentReply(10155755392661080);
+
+DROP PROCEDURE IF EXISTS DeletePostComment;
+DELIMITER $$
+CREATE PROCEDURE DeletePostComment(
+    IN comment_id BIGINT
+)
+BEGIN
+	DELETE FROM content_react WHERE content_id IN(
+		SELECT reply_id FROM comment_reply WHERE comment_reply.comment_id = comment_id
+	);
+    DELETE FROM content_react WHERE content_id = comment_id;
+    DELETE FROM comment_reply WHERE comment_reply.comment_id = comment_id;
+    DELETE FROM post_comment WHERE post_comment.comment_id = comment_id;
+END$$
+DELIMITER ;
+
+-- CALL DeletePostComment(10155755392661079);
+
+DROP PROCEDURE IF EXISTS DeletePost;
+DELIMITER $$
+CREATE PROCEDURE DeletePost(
+    IN post_id BIGINT
+)
+BEGIN
+    DELETE FROM content_react WHERE content_id IN(
+		SELECT reply_id FROM comment_reply WHERE comment_reply.reply_id = reply_id
+	);
+	DELETE FROM content_react WHERE content_id IN(
+		SELECT comment_id FROM post_comment WHERE post_comment.post_id = post_id
+	);
+    DELETE FROM content_react WHERE content_id = post_id;
+    DELETE FROM comment_reply WHERE comment_reply.post_id = post_id;
+    DELETE FROM post_comment WHERE post_comment.post_id = post_id;
+    DELETE FROM post WHERE post.post_id = post_id;
+END$$
+DELIMITER ;
+
+-- CALL DeletePost(10155755392661078);
