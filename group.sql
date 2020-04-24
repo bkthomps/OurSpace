@@ -78,7 +78,8 @@ BEGIN
     DECLARE admin_count INT;
     SELECT COUNT(person.person_id) INTO person_count FROM person WHERE person.person_id = person_id;
     SELECT COUNT(groups.group_id) INTO group_count FROM groups WHERE groups.group_id = group_id;
-    SELECT COUNT(group_admin.person_id) INTO admin_count FROM group_admin WHERE group_admin.person_id = person_id;
+    SELECT COUNT(group_admin.person_id) INTO admin_count FROM group_admin
+        WHERE groups.group_id = group_id AND group_admin.person_id = person_id;
     IF person_count != 1 THEN
         SET error_code = 1;
     ELSEIF group_count != 1 THEN

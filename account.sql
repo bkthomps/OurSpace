@@ -45,25 +45,18 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS DeleteAccount;
 DELIMITER $$
 CREATE PROCEDURE DeleteAccount(
-    IN person_id   BIGINT,
-    OUT error_code INT
+    IN person_id BIGINT
 )
 BEGIN
-    DECLARE user_count BIGINT;
-    SELECT COUNT(person.person_id) INTO user_count FROM person WHERE person.person_id = person_id;
-    IF user_count = 0 THEN
-		SET error_code = 1;
-	ELSE
-		-- TODO: remove all reactions
-        -- TODO: remove all comment replies
-        -- TODO: remove all post comments
-        -- TODO: remove all posts
-        -- TODO: unfollow all groups
-        -- TODO: unfollow all friends
-        -- TODO: remove all admins/deleting groups
-		DELETE FROM person WHERE person.person_id = person_id;
-		SET error_code = 0;
-    END IF;
+    DELETE FROM content_react WHERE reacting_person_id = person_id;
+    DELETE FROM comment_reply WHERE comment_reply.person_id = person_id;
+    DELETE FROM post_comment WHERE post_comment.person_id = person_id;
+    DELETE FROM post WHERE post.person_id = person_id;
+    DELETE FROM following_friends WHERE first_person_id = person_id OR second_person_id = person_id;
+    DELETE FROM group_admin WHERE group_admin.person_id = person_id;
+    DELETE FROM following_groups WHERE following_groups.person_id = person_id;
+    DELETE FROM person WHERE person.person_id = person_id;
+    -- Note: can result in groups without admins if this user was the only admin in a group
 END$$
 DELIMITER ;
 
