@@ -266,19 +266,17 @@ public class CreateInsertions {
             var postID = attributes[1].split("_")[1];
             var personID = attributes[2];
             var timeStamp = attributes[4];
-            var shares = attributes[5];
             var content = attributes[7].replace("{COMMA}", ",").replace("{APOST}", "\\'").replace("{RET}", " ");
-            int likes = (int) Double.parseDouble(attributes[8].isEmpty() ? "0.0" : attributes[8]);
             if (!posts.contains(postID) && peopleID.containsKey(personID)) {
                 posts.add(postID);
                 String insert;
                 if (!isSubsequent) {
-                    insert = String.format("INSERT INTO post VALUES (%s, '%s', %s, %s, '%s', %d, %s),",
-                            postID, content, personID, groupID, timeStamp, likes, shares);
+                    insert = String.format("INSERT INTO post VALUES (%s, '%s', %s, %s, '%s'),",
+                            postID, content, personID, groupID, timeStamp);
                     isSubsequent = true;
                 } else {
-                    insert = String.format("    (%s, '%s', %s, %s, '%s', %d, %s),",
-                            postID, content, personID, groupID, timeStamp, likes, shares);
+                    insert = String.format("    (%s, '%s', %s, %s, '%s'),",
+                            postID, content, personID, groupID, timeStamp);
                 }
                 list.add(insert);
             }

@@ -28,7 +28,7 @@ BEGIN
 	ELSEIF group_id IS NOT NULL AND group_count != 1 THEN
 		SET error_code = 2;
 	ELSE
-		INSERT INTO post VALUES (current_post_id, content, person_id, group_id, NOW(), 0, 0);
+		INSERT INTO post VALUES (current_post_id, content, person_id, group_id, NOW());
 		SET post_id = current_post_id;
 		SET error_code = 0;
     END IF;

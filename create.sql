@@ -58,8 +58,6 @@ CREATE TABLE post(
 	person_id  BIGINT         NOT NULL,
 	group_id   BIGINT,
 	time_stamp VARCHAR(20)    NOT NULL,
-	likes      INT            NOT NULL,
-	shares     INT            NOT NULL,
 	PRIMARY KEY (post_id)
 );
 
