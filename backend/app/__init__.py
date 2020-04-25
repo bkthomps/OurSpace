@@ -3,7 +3,7 @@ import json
 from flask import Flask, request, jsonify
 from os import environ
 from string import Template
-from .utils.queries import groups_query, show_followed_users, show_friend, show_unfollowed_users, show_group, show_followed_groups, show_unfollowed_groups, show_user, show_reaction, show_comment, show_comment_reply
+from .utils.queries import groups_query, show_followed_users, show_friend, show_unfollowed_users, show_group, show_followed_groups, show_unfollowed_groups, show_user, show_reaction, show_comment, show_comment_reply, show_group_admin
 
 def create_app(test_config=None):
     # create and configure the app
@@ -41,6 +41,14 @@ def create_app(test_config=None):
 
         disconnect(cnx, cursor)
         return output
+    
+    @app.route('/<uid>/delete', methods = ['POST']) 
+    def delete_user(uid):
+        cnx, cursor = connect()
+        cursor.callproc('DeleteAccount', [uid])
+        cnx.commit()
+        disconnect(cnx, cursor)
+        return {"data": {"userId": uid}}
 
     @app.route('/<uid>/profile', methods = ['GET', 'POST']) 
     def user_profile(uid): 
@@ -124,11 +132,11 @@ def create_app(test_config=None):
     
     @app.route('/<uid>/posts/<pid>', methods = ['POST'])
     def delete_post(uid, pid):
-         cnx, cursor = connect()
-         cursor.callproc('DeletePost', [pid])
-         cnx.commit()
-         disconnect(cnx, cursor)
-         return {"data": {"postId": pid}}
+        cnx, cursor = connect()
+        cursor.callproc('DeletePost', [pid])
+        cnx.commit()
+        disconnect(cnx, cursor)
+        return {"data": {"postId": pid}}
 
     @app.route('/<uid>/<pid>/comments', methods = ['GET', 'POST'])
     def comments(uid, pid):
@@ -165,11 +173,11 @@ def create_app(test_config=None):
     
     @app.route('/<uid>/<pid>/comments/<cid>', methods = ['POST'])
     def delete_post_comment(uid, pid, cid):
-         cnx, cursor = connect()
-         cursor.callproc('DeletePostComment', [cid])
-         cnx.commit()
-         disconnect(cnx, cursor)
-         return {"data": {"commentId": cid}}
+        cnx, cursor = connect()
+        cursor.callproc('DeletePostComment', [cid])
+        cnx.commit()
+        disconnect(cnx, cursor)
+        return {"data": {"commentId": cid}}
 
     @app.route('/<uid>/<pid>/<cid>/commentreplies', methods = ['GET', 'POST'])
     def reply_comment(uid, cid, pid):
@@ -205,12 +213,12 @@ def create_app(test_config=None):
 
     @app.route('/<uid>/<pid>/<cid>/commentreplies/<crid>', methods = ['GET', 'POST'])
     def delete_reply_comment(uid, pid, cid, crid):
-         cnx, cursor = connect()
-         cursor.callproc('DeleteCommentReply', [crid])
-         cnx.commit()
-         disconnect(cnx, cursor)
+        cnx, cursor = connect()
+        cursor.callproc('DeleteCommentReply', [crid])
+        cnx.commit()
+        disconnect(cnx, cursor)
 
-         return {"data": {"commentReplyId": crid}}
+        return {"data": {"commentReplyId": crid}}
 
 
     @app.route('/<uid>/users/follow', methods = ['GET', 'POST'])
@@ -285,10 +293,11 @@ def create_app(test_config=None):
                 cnx.commit()
                 cursor.execute(Template(show_group).substitute(id=group_id))
                 data = {}
-                for (group_id, group_name) in cursor:
+                for (group_id, group_name, admins) in cursor:
                     data[group_id] = {
                         "groupId": group_id,
                         "groupName": group_name,
+                        "admins": admins,
                     }
                 output = {"data": data} 
             else:
@@ -296,10 +305,11 @@ def create_app(test_config=None):
         else:
             data = {}
             cursor.execute(Template(show_followed_groups).substitute(id=uid))
-            for (group_id, group_name) in cursor:
+            for (group_id, group_name, admins) in cursor:
                 data[group_id] = {
                     "groupId": group_id,
                     "groupName": group_name,
+                    "admins": admins,
                 }
             output = {"data" : data}
         disconnect(cnx, cursor)
@@ -323,14 +333,70 @@ def create_app(test_config=None):
         else:
             data = {}
             cursor.execute(Template(show_unfollowed_groups).substitute(id=uid))
-            for (group_id, group_name) in cursor:
+            for (group_id, group_name, admins) in cursor:
                 data[group_id] = {
                     "groupId": group_id,
                     "groupName": group_name,
+                    "admins": admins
                 }
             output = {"data" : data}
         disconnect(cnx, cursor)
         return output
+    
+    @app.route('/<uid>/groups/create', methods = ['POST'])
+    def create_group(uid):
+        cnx, cursor = connect()
+        group_name = request.get_json()['groupName']
+        result = cursor.callproc('CreateGroup', [group_name, uid, 0, 0])
+        row_headers = ['groupId', 'groupName', 'admins']
+        groups = []
+        if result[-1] == 0:
+            cnx.commit()
+            group_id = result[-2]
+            cursor.execute(Template(show_group).substitute(id=group_id))
+            for r in cursor:
+                groups.append(dict(zip(row_headers, r)))
+            data = {}
+            data["groups"] = groups
+            disconnect(cnx, cursor)
+            return {"data": data}
+        disconnect(cnx, cursor)
+        return {"error": result[-1]}
+
+    @app.route('/<uid>/groups/delete', methods = ['POST'])
+    def delete_group(uid):
+        cnx, cursor = connect()
+        group_id = request.get_json()['groupId']
+        cursor.callproc('DeleteGroup', [group_id])
+        cnx.commit()
+        disconnect(cnx, cursor)
+        return {"data": {"groupId": group_id}}
+
+    @app.route('/<uid>/groupadmin/create', methods = ['POST'])
+    def create_group_admin(uid):
+        cnx, cursor = connect()
+        person_id = request.get_json()['personId']
+        group_id = request.get_json()['groupId']
+        result = cursor.callproc('AddAdmin', [person_id, group_id, 0])
+        if result[-1] == 0:
+            cnx.commit()
+            disconnect(cnx, cursor)
+            return {"data": {"groupAdminId": person_id}}
+        disconnect(cnx, cursor)
+        return {"error": result[-1]}
+
+    @app.route('/<uid>/groupadmin/delete', methods = ['POST'])
+    def delete_group_admin(uid):
+        cnx, cursor = connect()
+        person_id = request.get_json()['personId']
+        group_id = request.get_json()['groupId']
+        result = cursor.callproc('RemoveAdmin', [person_id, group_id, 0])
+        if result[-1] == 0:
+            cnx.commit()
+            disconnect(cnx, cursor)
+            return {"data": {"groupAdminId": person_id}}
+        disconnect(cnx, cursor)
+        return {"error": result[-1]}
 
     @app.route('/<uid>/content/<cid>/react', methods = ['POST'])
     def react(uid, cid):
