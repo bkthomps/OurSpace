@@ -84,7 +84,7 @@ BEGIN
     DECLARE group_count INT;
     DECLARE relation_count INT;
     SELECT COUNT(person.person_id) INTO person_count FROM person WHERE person.person_id = person_id;
-    SELECT COUNT(groups.group_id) INTO group_count FROM groups WHERE groups.group_id = group_id;
+    SELECT COUNT(`groups`.group_id) INTO group_count FROM `groups` WHERE `groups`.group_id = group_id;
     SELECT COUNT(*)
 		INTO relation_count
         FROM following_groups
