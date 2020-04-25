@@ -243,7 +243,7 @@ def create_app(test_config=None):
                 output = {"error": result[-1]}
         else:
             data = {}
-            cursor.execute(Template(show_followed_users).substitute(id=uid))
+            cursor.execute(Template(show_unfollowed_users).substitute(id=uid))
             for (person_id, first_name, last_name) in cursor:
                 data[person_id] = {
                     "userId": person_id,
@@ -271,7 +271,7 @@ def create_app(test_config=None):
                 output = {"error": result[-1]}
         else:
             data = {}
-            cursor.execute(Template(show_unfollowed_users).substitute(id=uid))
+            cursor.execute(Template(show_followed_users).substitute(id=uid))
             for (person_id, first_name, last_name) in cursor:
                 data[person_id] = {
                     "userId": person_id,
@@ -304,7 +304,7 @@ def create_app(test_config=None):
                 output = {"error": result[-1]}
         else:
             data = {}
-            cursor.execute(Template(show_followed_groups).substitute(id=uid))
+            cursor.execute(Template(show_unfollowed_groups).substitute(id=uid))
             for (group_id, group_name, admins) in cursor:
                 data[group_id] = {
                     "groupId": group_id,
@@ -332,7 +332,7 @@ def create_app(test_config=None):
                 output = {"error": result[-1]}
         else:
             data = {}
-            cursor.execute(Template(show_unfollowed_groups).substitute(id=uid))
+            cursor.execute(Template(show_followed_groups).substitute(id=uid))
             for (group_id, group_name, admins) in cursor:
                 data[group_id] = {
                     "groupId": group_id,
