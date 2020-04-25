@@ -11,8 +11,5 @@ show_user = 'select * from our_space.person where person_id = $id;'
 
 show_reaction = 'select * from our_space.content_react where reacting_person_id = $pid and content_id = $cid;' 
 
-show_comments = 'select * from our_space.post_comment where post_id = $pid;'
 show_comment = 'select * from our_space.post_comment where comment_id = $cid;'
-
-show_comment_replies = 'select * from our_space.comment_reply where comment_id = $cid;'
 show_comment_reply = 'select * from our_space.comment_reply where reply_id = $rid;'

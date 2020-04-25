@@ -1,8 +1,9 @@
 import mysql.connector
-from flask import Flask, request
+import json
+from flask import Flask, request, jsonify
 from os import environ
 from string import Template
-from .utils.queries import groups_query, show_followed_users, show_friend, show_unfollowed_users, show_group, show_followed_groups, show_unfollowed_groups, show_user, show_reaction, show_comment, show_comments, show_comment_reply, show_comment_replies
+from .utils.queries import groups_query, show_followed_users, show_friend, show_unfollowed_users, show_group, show_followed_groups, show_unfollowed_groups, show_user, show_reaction, show_comment, show_comment_reply
 
 def create_app(test_config=None):
     # create and configure the app
@@ -96,20 +97,28 @@ def create_app(test_config=None):
         if request.method == 'POST':
             request_data = request.get_json()
             proc_result = cursor.callproc('CreatePost', [uid, request_data['groupId'], request_data['content'], 0, 0])
+            cnx.commit()
             disconnect(cnx, cursor)
             return {"data": {"postId": str(proc_result[-2])}} if proc_result[-1] == 0 else {"error": proc_result[-1]}
-        proc_result = cursor.callproc('GetPosts', [str(request.args.get('time')), uid, ''])
-        data = {}
+        
+        proc_args = [
+            request.args.get('time'),
+            uid,
+            request.args.get('page'),
+            '',
+        ]
+        proc_result = cursor.callproc('GetPosts', proc_args)
+        row_headers = ['postId', 'content', 'personId', 'groupId', 'timeStamp', 'userReaction', 'reaction']
+        posts = []
         for result in cursor.stored_results():
-            for (post_id, content, person_id, group_id, time_stamp) in result.fetchall():
-                data[str(post_id)] = {
-                    "postId": str(post_id),
-                    "content": content,
-                    "personId": str(person_id),
-                    "groupId": str(group_id),
-                    "timeStamp": time_stamp,
-                }
+            for r in result.fetchall():
+                r_json = [x for x in r]
+                print(r_json)
+                r_json[-1] = r_json[-1] and json.loads(r_json[-1])
+                posts.append(dict(zip(row_headers, r_json)))
+        data = {}
         data["latest_time_read"] = proc_result[-1]
+        data["posts"] = posts
         disconnect(cnx, cursor)
         return {"data": data}
     
@@ -117,97 +126,91 @@ def create_app(test_config=None):
     def delete_post(uid, pid):
          cnx, cursor = connect()
          cursor.callproc('DeletePost', [pid])
+         cnx.commit()
          disconnect(cnx, cursor)
          return {"data": {"postId": pid}}
 
     @app.route('/<uid>/<pid>/comments', methods = ['GET', 'POST'])
     def comments(uid, pid):
         cnx, cursor = connect()
-        output = {}
+        row_headers = ['commentId', 'content', 'personId', 'groupId', 'timeStamp', 'postId','userReaction', 'reaction']
         if request.method == 'POST':
             request_data = request.get_json()
             proc_result = cursor.callproc('CreatePostComment', [uid, request_data['groupId'], request_data['content'], pid, 0, 0])
             if proc_result[-1] == 0:
-                data = {}
+                cnx.commit()
+                comments = []
                 cursor.execute(Template(show_comment).substitute(cid=proc_result[-2]))
-                for (comment_id, content, person_id, group_id, time_stamp, post_id) in cursor:
-                    data[str(comment_id)] = {
-                        "commentId": str(comment_id),
-                        "content": content,
-                        "personId": str(person_id),
-                        "groupId": str(group_id),
-                        "timeStamp": time_stamp,
-                        "postId": str(post_id)
-                    }
+                for r in cursor:
+                    comments.append(dict(zip(row_headers, r)))
                 disconnect(cnx, cursor)
+                data = {}
+                data["comments"] = comments
                 return {"data": data}
             disconnect(cnx, cursor)
             return {"error": proc_result[-1]}
-        cursor.execute(Template(show_comments).substitute(pid=pid))
+        
+        cursor.callproc('GetComments', [pid, uid, request.args.get('page')])
+        comments = []
+        for result in cursor.stored_results():
+            for r in result.fetchall():
+                r_json = [x for x in r]
+                print(r_json)
+                r_json[-1] = r_json[-1] and json.loads(r_json[-1])
+                comments.append(dict(zip(row_headers, r_json)))
         data = {}
-        for (comment_id, content, person_id, group_id, time_stamp, post_id) in cursor:
-            data[str(comment_id)] = {
-                "commentId": str(comment_id),
-                "content": content,
-                "personId": str(person_id),
-                "groupId": str(group_id),
-                "timeStamp": time_stamp,
-                "postId": str(post_id)
-            }
+        data["comments"] = comments
         disconnect(cnx, cursor)
         return {"data": data}
     
     @app.route('/<uid>/<pid>/comments/<cid>', methods = ['POST'])
-    def delete_post_comment(cid):
+    def delete_post_comment(uid, pid, cid):
          cnx, cursor = connect()
          cursor.callproc('DeletePostComment', [cid])
+         cnx.commit()
          disconnect(cnx, cursor)
          return {"data": {"commentId": cid}}
 
-    @app.route('/<uid>/<cid>/commentreplies', methods = ['GET', 'POST'])
-    def reply_comment(uid, cid):
-       cnx, cursor = connect()
+    @app.route('/<uid>/<pid>/<cid>/commentreplies', methods = ['GET', 'POST'])
+    def reply_comment(uid, cid, pid):
+        cnx, cursor = connect()
+        row_headers = ['replyId', 'content', 'personId', 'groupId', 'timeStamp', 'postId', 'commentId', 'userReaction', 'reaction']
         if request.method == 'POST':
             request_data = request.get_json()
             proc_result = cursor.callproc('CreateCommentReply', [uid, request_data['groupId'], request_data['content'], pid, cid, 0, 0])
             if proc_result[-1] == 0:
-                data = {}
+                cnx.commit()
+                replies = []
                 cursor.execute(Template(show_comment_reply).substitute(rid=proc_result[-2]))
-                for (reply_id, content, person_id, group_id, time_stamp, post_id, comment_id) in cursor:
-                    data[str(reply_id)] = {
-                        "replyId": str(reply_id),
-                        "content": content,
-                        "personId": str(person_id),
-                        "groupId": str(group_id),
-                        "timeStamp": time_stamp,
-                        "postId": str(post_id),
-                        "commentId": str(comment_id)
-                    }
+                for r in cursor:
+                    replies.append(dict(zip(row_headers, r)))
                 disconnect(cnx, cursor)
+                data = {}
+                data["replies"] = replies
                 return {"data": data}
             disconnect(cnx, cursor)
             return {"error": proc_result[-1]}
-        cursor.execute(Template(show_comment_replies).substitute(cid=cid))
+        cursor.callproc('GetCommentReplies', [cid, uid, request.args.get('page')])
+        replies = []
+        for result in cursor.stored_results():
+            for r in result.fetchall():
+                r_json = [x for x in r]
+                print(r_json)
+                r_json[-1] = r_json[-1] and json.loads(r_json[-1])
+                replies.append(dict(zip(row_headers, r_json)))
         data = {}
-        for (reply_id, content, person_id, group_id, time_stamp, post_id, comment_id) in cursor:
-            data[str(reply_id)] = {
-                "replyId": str(reply_id),
-                "content": content,
-                "personId": str(person_id),
-                "groupId": str(group_id),
-                "timeStamp": time_stamp,
-                "postId": str(post_id),
-                "commentId": str(comment_id)
-            }
+        data["replies"] = replies
         disconnect(cnx, cursor)
         return {"data": data}
 
-    @app.route('/<uid>/<cid>/commentreplies/<crid>', methods = ['GET', 'POST'])
-    def delete_reply_comment(crid):
+    @app.route('/<uid>/<pid>/<cid>/commentreplies/<crid>', methods = ['GET', 'POST'])
+    def delete_reply_comment(uid, pid, cid, crid):
          cnx, cursor = connect()
          cursor.callproc('DeleteCommentReply', [crid])
+         cnx.commit()
          disconnect(cnx, cursor)
-         return {"data": {"commentReplyId": cid}}
+
+         return {"data": {"commentReplyId": crid}}
 
 
     @app.route('/<uid>/users/follow', methods = ['GET', 'POST'])

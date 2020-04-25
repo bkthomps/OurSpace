@@ -16,12 +16,12 @@ BEGIN
 	SELECT MAX(id) + 1
     INTO current_post_id
     FROM (
-		SELECT MAX(post_id) AS id FROM post
+		SELECT MAX(post.post_id) AS id FROM post
         UNION SELECT MAX(comment_id) AS id FROM post_comment
         UNION SELECT MAX(reply_id) AS id FROM comment_reply
     ) A;
     SELECT COUNT(person.person_id) INTO person_count FROM person WHERE person.person_id = person_id;
-    SELECT COUNT(groups.group_id) INTO group_count FROM groups WHERE groups.group_id = group_id;
+    SELECT COUNT(`groups`.group_id) INTO group_count FROM `groups` WHERE `groups`.group_id = group_id;
     SET post_id = 0;
     IF person_count != 1 THEN
 		SET error_code = 1;
@@ -44,7 +44,7 @@ DELIMITER ;
 -- CALL CreatePost(10216646959432838, NULL, "Hello", @post_id, @error_code);
 -- SELECT @post_id;
 -- SELECT @error_code;
-
+-- CALL CreatePost(10216646959432838, 335787510131917, "Hello", @post_id, @error_code);
 DROP PROCEDURE IF EXISTS CreatePostComment;
 DELIMITER $$
 CREATE PROCEDURE CreatePostComment(
@@ -63,12 +63,12 @@ BEGIN
 	SELECT MAX(id) + 1
     INTO current_comment_id
     FROM (
-		SELECT MAX(post_id) AS id FROM post
-        UNION SELECT MAX(comment_id) AS id FROM post_comment
-        UNION SELECT MAX(reply_id) AS id FROM comment_reply
+		SELECT MAX(post.post_id) AS id FROM post
+        UNION SELECT MAX(post_comment.comment_id) AS id FROM post_comment
+        UNION SELECT MAX(comment_reply.reply_id) AS id FROM comment_reply
     ) A;
     SELECT COUNT(person.person_id) INTO person_count FROM person WHERE person.person_id = person_id;
-    SELECT COUNT(groups.group_id) INTO group_count FROM groups WHERE groups.group_id = group_id;
+    SELECT COUNT(`groups`.group_id) INTO group_count FROM `groups` WHERE `groups`.group_id = group_id;
     SELECT COUNT(post.post_id) INTO post_count FROM post WHERE post.post_id = post_id;
     SET comment_id = 0;
     IF person_count != 1 THEN
@@ -118,12 +118,12 @@ BEGIN
 	SELECT MAX(id) + 1
     INTO current_reply_id
     FROM (
-		SELECT MAX(post_id) AS id FROM post
-        UNION SELECT MAX(comment_id) AS id FROM post_comment
-        UNION SELECT MAX(reply_id) AS id FROM comment_reply
+		SELECT MAX(post.post_id) AS id FROM post
+        UNION SELECT MAX(post_comment.comment_id) AS id FROM post_comment
+        UNION SELECT MAX(comment_reply.reply_id) AS id FROM comment_reply
     ) A;
     SELECT COUNT(person.person_id) INTO person_count FROM person WHERE person.person_id = person_id;
-    SELECT COUNT(groups.group_id) INTO group_count FROM groups WHERE groups.group_id = group_id;
+    SELECT COUNT(`groups`.group_id) INTO group_count FROM `groups` WHERE `groups`.group_id = group_id;
     SELECT COUNT(post.post_id) INTO post_count FROM post WHERE post.post_id = post_id;
     SELECT COUNT(post_comment.comment_id) INTO comment_count FROM post_comment WHERE post_comment.comment_id = comment_id;
     SET reply_id = 0;
